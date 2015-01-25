@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+import os, sys
+
+local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+sys.path.append(local_path + "/./")
+
+import YahooFinceExted as yahoofinance;
+
+import urllib, urllib2
+
+import multiprocessing
+
+import finsymbols
+
+
+root = "/home/work/workplace/stock_data/"
+if not os.path.exists(root):
+    os.makedirs(root)
+
+def get_nasdaq2000():
+    fd = open(local_path+"/nasdaq_symbols", 'r')
+    ss=[]
+    for j in fd:
+        stock_name = j.rstrip()
+        ss.append(stock_name)
+    return ss
+
+def get_sp500():#{{{
+    symbols = []
+    for each in finsymbols.symbols.get_sp500_symbols():
+        symbols.append(each['symbol'])
+    return symbols  
+#}}}
+
+def get_nyse_symbols():#{{{
+    symbols = []
+    for each in finsymbols.symbols.get_nyse_symbols():
+        symbols.append(each['symbol'])
+    return symbols  
+#}}}
+
+def get_nasdaq_symbols():#{{{
+    symbols = []
+    for each in finsymbols.symbols.get_nasdaq_symbols():
+        symbols.append(each['symbol'])
+    return symbols  
+#}}}
+
+def one_work(symbol): # {{{
+    print symbol
+    retry = 3
+    while retry >= 0:
+        try:
+            yahoofinance.download_daily_bars_full(symbol, os.path.join(root, symbol + ".csv.bk"))
+            os.rename(os.path.join(root,symbol+".csv.bk"), os.path.join(root,symbol+".csv"))
+        except Exception,ex:
+            print symbol, Exception, ":", ex
+            retry -=1
+            continue
+        break
+#}}}
+
+def main():
+    symbols = get_sp500()
+    symbols.extend(get_nyse_symbols())
+    symbols.extend(get_nasdaq_symbols())
+    symbols = list(set(symbols))
+    symbols.sort()
+    pool = multiprocessing.Pool(processes =10 )
+    result = {}
+    for symbol in symbols:
+        if symbol.find("^") > 0:
+            continue
+        if symbol.find("/") >0 :
+            continue
+        #one_work(symbol)
+        result[symbol] = pool.apply_async(one_work, (symbol,))
+    for symbol in symbols:
+        if symbol.find("^") > 0:
+            continue
+        if symbol.find("/") >0 :
+            continue
+        result[symbol].get()
+
+if __name__ == '__main__':
+    main()
