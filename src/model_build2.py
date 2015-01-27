@@ -14,7 +14,6 @@ import time
 
 import numpy as np
 import pandas as pand
-import matplotlib.pyplot as plt
 
 ''' QSTK imports '''
 from QSTK.qstkutil import DataAccess as da
@@ -32,14 +31,14 @@ from sklearn.neighbors import KNeighborsRegressor
 from functions import sequentialForwardSelection
 
 import model_featutil as mftu
+import model_common as mcomm
 
 def main(options, args):
-    y_true = np.array([0, 0, 1, 1])
-    y_scores = np.array([0.1, 0.4, 0.35, 0.8])
-    print y_true.shape
-    print roc_auc_score(y_true, y_scores)
-    f = open('2008Dow30.txt')
-    lsSymTrain = f.read().splitlines() + ['$SPX']
+    fTest = args[0]
+    fTrain = args[1]
+    fCheck = args[2]
+    f = open('2010Dow30.txt')
+    lsSymTrain = f.read().splitlines(0) + ['$SPX']
     f.close()
 
     f = open('2010Dow30.txt')
@@ -49,8 +48,8 @@ def main(options, args):
    
     lsSym= list(set(lsSymTrain).union(set(lsSymTest)))
 
-    dtStart = dt.datetime(2008, 01, 01)
-    dtEnd = dt.datetime(2010, 12, 31)
+    dtStart = dt.datetime(2012, 01, 01)
+    dtEnd = dt.datetime(2015, 01, 26)
     #dtStart = dt.datetime(2008, 01, 01)
     #dtEnd = dt.datetime(2008, 02, 28)
 
@@ -72,56 +71,29 @@ def main(options, args):
 
     dDataTest = dict(zip(lsKeys, ldfDataTest))
 
+    lfcFeatures, ldFeatureArgs = mcomm.getFeats()
 
-    lfcFeatures = [ featMA, featMA, featMA, featMA, featMA, featMA, \
-               featRSI, featRSI, featRSI, featRSI, featRSI, featRSI, \
-               featDrawDown, featDrawDown, featDrawDown, featDrawDown, featDrawDown, featDrawDown, \
-               featRunUp, featRunUp, featRunUp, featRunUp, featRunUp, featRunUp, \
-               featVolumeDelta, featVolumeDelta, featVolumeDelta, featVolumeDelta, featVolumeDelta, featVolumeDelta, \
-               featAroon, featAroon, featAroon, featAroon, featAroon, featAroon, featAroon, featAroon, featAroon, featAroon, featAroon, featAroon, \
-               #featStochastic, featStochastic, featStochastic, featStochastic, featStochastic, featStochastic,featStochastic, featStochastic, featStochastic, featStochastic, featStochastic, featStochastic, \
-               featBeta, featBeta, featBeta, featBeta, featBeta, featBeta,\
-               featBollinger, featBollinger, featBollinger, featBollinger, featBollinger, featBollinger,\
-               featCorrelation, featCorrelation, featCorrelation, featCorrelation, featCorrelation, featCorrelation,\
-               featPrice, \
-               featVolume, \
-               class_fut_ret \
-               ]
-
-    ldFeatureArgs = [  {'lLookback':5},{'lLookback':10},{'lLookback':20}, {'lLookback':5,'MR':True},{'lLookback':10,'MR':True},{'lLookback':20,'MR':True},\
-            {'lLookback':5},{'lLookback':10},{'lLookback':20}, {'lLookback':5,'MR':True},{'lLookback':10,'MR':True},{'lLookback':20,'MR':True},\
-            {'lLookback':5},{'lLookback':10},{'lLookback':20}, {'lLookback':5,'MR':True},{'lLookback':10,'MR':True},{'lLookback':20,'MR':True},\
-            {'lLookback':5},{'lLookback':10},{'lLookback':20}, {'lLookback':5,'MR':True},{'lLookback':10,'MR':True},{'lLookback':20,'MR':True},\
-            {'lLookback':5},{'lLookback':10},{'lLookback':20}, {'lLookback':5,'MR':True},{'lLookback':10,'MR':True},{'lLookback':20,'MR':True},\
-            {'lLookback':5,'bDown':True},{'lLookback':10,'bDown':True},{'lLookback':20,'bDown':True},{'lLookback':5,'bDown':False},{'lLookback':10,'bDown':False},{'lLookback':20,'bDown':False},{'lLookback':5,'bDown':True,'MR':True},{'lLookback':10,'bDown':True,'MR':True},{'lLookback':20,'bDown':True,'MR':True},{'lLookback':5,'bDown':False,'MR':True},{'lLookback':10,'bDown':False,'MR':True},{'lLookback':20,'bDown':False,'MR':True},\
-            #{'lLookback':5,'bFast':True},{'lLookback':10,'bFast':True},{'lLookback':20,'bFast':True},{'lLookback':5,'bFast':False},{'lLookback':10,'bFast':False},{'lLookback':20,'bFast':False},{'lLookback':5,'bFast':True,'MR':True},{'lLookback':10,'bFast':True,'MR':True},{'lLookback':20,'bFast':True,'MR':True},{'lLookback':5,'bFast':False,'MR':True},{'lLookback':10,'bFast':False,'MR':True},{'lLookback':20,'bFast':False,'MR':True},\
-            {'lLookback':5},{'lLookback':10},{'lLookback':20}, {'lLookback':5,'MR':True},{'lLookback':10,'MR':True},{'lLookback':20,'MR':True},\
-            {'lLookback':5},{'lLookback':10},{'lLookback':20}, {'lLookback':5,'MR':True},{'lLookback':10,'MR':True},{'lLookback':20,'MR':True},\
-            {'lLookback':5},{'lLookback':10},{'lLookback':20}, {'lLookback':5,'MR':True},{'lLookback':10,'MR':True},{'lLookback':20,'MR':True},\
-            {},\
-            {}, \
-            {'i_lookforward':5} \
-            ]
     ldfTrain = ftu.applyFeatures(dDataTrain, lfcFeatures, ldFeatureArgs, '$SPX')
+    print ldfTrain[0]
     ldfTest = ftu.applyFeatures(dDataTest, lfcFeatures, ldFeatureArgs, '$SPX')
 
-    dtStartTrain = dt.datetime(2008, 01, 01)
-    dtEndTrain   = dt.datetime(2009, 12, 31)
-    dtStartTest  = dt.datetime(2010, 01, 01)
-    dtEndTest    = dt.datetime(2010, 12, 31)
+    dtStartTrain = dt.datetime(2013, 01, 01)
+    dtEndTrain   = dt.datetime(2015, 01, 26)
+    dtStartTest  = dt.datetime(2012, 01, 01)
+    dtEndTest    = dt.datetime(2012, 12, 31)
     #dtStartTrain = dt.datetime(2008, 01, 01)
     #dtEndTrain   = dt.datetime(2008, 01, 31)
     #dtStartTest  = dt.datetime(2008, 02, 01)
     #dtEndTest    = dt.datetime(2008, 02, 28)
 
     naTrain = ftu.stackSyms(ldfTrain, dtStartTrain, dtEndTrain) 
+    print naTrain
     naTest  = ftu.stackSyms(ldfTest, dtStartTest, dtEndTest) 
-    np.savetxt("naTrain.csv", naTrain)
-    np.savetxt("naTest.csv", naTest)
-    mftu.stackSymsToFile(ldfTrain, "./train.csv", dtStartTrain, dtEndTrain, bShowRemoved=False)
-    mftu.stackSymsToFile(ldfTest, "./test.csv", dtStartTest, dtEndTest)
+    mftu.stackSymsToFile(ldfTrain, fTrain, dtStartTrain, dtEndTrain, bShowRemoved=False)
+    mftu.stackSymsToFile(ldfTest, fTest, dtStartTest, dtEndTest, sel="all")
+    mftu.stackSymsToFile(ldfTest, fCheck, dtStartTest, dtEndTest, sel="all")
 
-    #sys.exit(0)
+    sys.exit(0)
     ''' Normalize features, use same normalization factors for testing data as training data '''
     ltWeights = ftu.normFeatures( naTrain, -1.0, 1.0, False )
     ''' Normalize query points with same weights that come from test data '''
@@ -152,6 +124,16 @@ def main(options, args):
     classLabelIndex = len(lfcFeatures)-1
     sequentialForwardSelection(naTrain, naTest, lFeatures, classLabelIndex)
 
-if __name__ == "__main__":
-    main(None, None)
     
+def parse_options(paraser): # {{{
+    """
+    parser command line
+    """
+    return parser.parse_args()
+#}}} 
+# execute start here
+if __name__ == "__main__": #{{{
+    parser = OptionParser()
+    (options, args) = parse_options(parser)
+    main(options, args)
+# }}}

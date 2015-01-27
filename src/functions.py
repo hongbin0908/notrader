@@ -34,8 +34,8 @@ MAX_ITERATIONS = 500
 
 def learnerTest( naTrain, naTest ):
     #create the learner with the train set with K=5
-    #model = KNeighborsRegressor(n_neighbors=10)
-    model = GradientBoostingRegressor(max_features=0.6, learning_rate=0.1, max_depth=5, n_estimators=300)
+    model = KNeighborsRegressor(n_neighbors=10)
+    #model = GradientBoostingRegressor(max_features=0.6, learning_rate=0.1, max_depth=5, n_estimators=300)
     #get the Y values predicted by the learner
     model.fit( naTrain[:,:-1], naTrain[:, -1] )
     Ypredicted = model.predict(naTest[:, :-1])
@@ -343,7 +343,7 @@ def sequentialFloatingBackwardSelectionNew(naFeatTrain,naFeatTest,lFeatures,clas
     maxlCorrCoefIndex = lCorrCoef.index(maxlCorrCoef)
     sys.stdout.write('best feature set is ' + str(list(lSeenStates[maxlCorrCoefIndex])+[classLabelIndex]) + '\n')
     sys.stdout.write('corr coef = ' + str(maxlCorrCoef))
-    return maxlCorrCoef
+    return maxlCorrCoef, list(lSeenStates[maxlCorrCoefIndex] + [classLabelIndex])
     
 def sequentialFloatingForwardSelectionNew_Max(naFeatTrain,naFeatTest,lFeatures,classLabelIndex):
     global MAX_ITERATIONS

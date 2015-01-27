@@ -91,7 +91,7 @@ def main(options, args):
     predicted = model.predict(X_test[:,:-1])
     corrcoef = np.corrcoef(X_test[:,-1], predicted)[0][1]
     print corrcoef
-#    tpred = model_predictor.predict(X_test)
+ #   tpred = model_predictor.predict(X_test)
  #   score = model_predictor.score(X_test, tpred)
  #   print "score=", score
     assert(len(predicted) == X_test.shape[0])

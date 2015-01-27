@@ -12,12 +12,11 @@ sys.path.append(local_path + "/./")
 import QSTK.qstklearn.kdtknn as kdt
 from QSTK.qstkutil import DataAccess as da
 from QSTK.qstkutil import qsdateutil as du
-from QSTK.qstkutil import tsutil as tsu
- 
+from QSTK.qstkutil import tsutil as tsu 
 from QSTK.qstkfeat.features import *
 from QSTK.qstkfeat.classes import class_fut_ret
 
-def stackSymsToFile( ldfFeatures, filename, dtStart=None, dtEnd=None, lsSym=None, sDelNan='ALL', bShowRemoved=False ):
+def stackSymsToFile( ldfFeatures, filename, dtStart=None, dtEnd=None, lsSym=None, sDelNan='ALL', bShowRemoved=False, sel="all" ): #{{{
     '''
     @summary: Remove symbols from the dataframes, effectively stacking all stocks on top of each other.
     @param ldfFeatures: List of data frames of features.
@@ -48,6 +47,10 @@ def stackSymsToFile( ldfFeatures, filename, dtStart=None, dtEnd=None, lsSym=None
         for dfFeat in ldfFeatures:
             ldfFeatures2.append(dfFeat.ix[dtStart:dtEnd])
         for i in range(0, len(ldfFeatures2[0].index)):
+            if sel == "odd" and i % 2 == 0:
+                continue 
+            if sel == "eve" and i % 2 == 1:
+                continue
             onelist = [];onelist.append(sStock)
             onelist.append(ldfFeatures2[0].index[i].strftime('%Y-%m-%d'))
             for dfFeat in ldfFeatures2:
@@ -64,4 +67,24 @@ def stackSymsToFile( ldfFeatures, filename, dtStart=None, dtEnd=None, lsSym=None
                 print 'Removed', sStock, str(onelist)
 
 
-   
+  # }}} 
+
+def loadFeatFromFile(filename, noise_num): #{{{
+    """
+    noise_num the item not to acount
+    """
+    fdIn = open(filename, "r")
+
+    l_X = []
+    for temp in fdIn:
+        tokens = temp.split(",")
+        features = []
+        for i in range(len(tokens)):
+            if i < noise_num:
+                continue
+            else:
+                features.append(float(tokens[i]))
+        l_X.append(features)
+    X = np.array(l_X)
+    return X
+    # }}}

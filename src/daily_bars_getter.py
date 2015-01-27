@@ -62,9 +62,9 @@ def one_work(symbol): # {{{
 
 def main():
     symbols = get_sp500()
-    symbols.extend(get_nyse_symbols())
-    symbols.extend(get_nasdaq_symbols())
-    symbols = list(set(symbols))
+    #symbols.extend(get_nyse_symbols())
+    #symbols.extend(get_nasdaq_symbols())
+    symbols = list(set(symbols) + ["SPX"])
     symbols.sort()
     pool = multiprocessing.Pool(processes =10 )
     result = {}
