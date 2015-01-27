@@ -87,7 +87,7 @@ def main(options, args):
     #dtEndTest    = dt.datetime(2008, 02, 28)
 
     naTrain = ftu.stackSyms(ldfTrain, dtStartTrain, dtEndTrain) 
-    print naTrain
+    print naTrain.head()
     naTest  = ftu.stackSyms(ldfTest, dtStartTest, dtEndTest) 
     mftu.stackSymsToFile(ldfTrain, fTrain, dtStartTrain, dtEndTrain, bShowRemoved=False)
     mftu.stackSymsToFile(ldfTest, fTest, dtStartTest, dtEndTest, sel="all")
