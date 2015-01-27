@@ -31,6 +31,8 @@ from sklearn.neighbors import KNeighborsRegressor
 
 from functions import sequentialForwardSelection
 
+import model_featutil as mftu
+
 def main(options, args):
     y_true = np.array([0, 0, 1, 1])
     y_scores = np.array([0.1, 0.4, 0.35, 0.8])
@@ -49,6 +51,8 @@ def main(options, args):
 
     dtStart = dt.datetime(2008, 01, 01)
     dtEnd = dt.datetime(2010, 12, 31)
+    #dtStart = dt.datetime(2008, 01, 01)
+    #dtEnd = dt.datetime(2008, 02, 28)
 
     norObj = da.DataAccess('Yahoo')
     ldtTimestamps = du.getNYSEdays(dtStart, dtEnd, dt.timedelta(hours = 16))
@@ -105,24 +109,31 @@ def main(options, args):
     dtEndTrain   = dt.datetime(2009, 12, 31)
     dtStartTest  = dt.datetime(2010, 01, 01)
     dtEndTest    = dt.datetime(2010, 12, 31)
+    #dtStartTrain = dt.datetime(2008, 01, 01)
+    #dtEndTrain   = dt.datetime(2008, 01, 31)
+    #dtStartTest  = dt.datetime(2008, 02, 01)
+    #dtEndTest    = dt.datetime(2008, 02, 28)
 
     naTrain = ftu.stackSyms(ldfTrain, dtStartTrain, dtEndTrain) 
     naTest  = ftu.stackSyms(ldfTest, dtStartTest, dtEndTest) 
+    np.savetxt("naTrain.csv", naTrain)
+    np.savetxt("naTest.csv", naTest)
+    mftu.stackSymsToFile(ldfTrain, "./train.csv", dtStartTrain, dtEndTrain, bShowRemoved=False)
+    mftu.stackSymsToFile(ldfTest, "./test.csv", dtStartTest, dtEndTest)
+
+    #sys.exit(0)
     ''' Normalize features, use same normalization factors for testing data as training data '''
     ltWeights = ftu.normFeatures( naTrain, -1.0, 1.0, False )
     ''' Normalize query points with same weights that come from test data '''
     ftu.normQuery( naTest[:,:-1], ltWeights )	
-    naTrainFeats = naTrain[:,:-1]
-    naTrainClasses = naTrain[:,-1]
-    naTestFeats = naTest[:,:-1]
-    naTestClasses = naTest[:,-1]
 
-    print "naTrainFeats:", naTrainFeats.shape, "naTrainClasses:", naTrainClasses
+    model = KNeighborsRegressor(n_neighbors=10)
+    model.fit(naTrain[:,:-1], naTrain[:,-1])
 
-    cLearn = ftu.createKnnLearner(naTrain, lKnn=5)
-    Ypredicted = cLearn.query(naTestFeats)
-    corrcoef = np.corrcoef(naTestClasses, Ypredicted)[0][1]
+    predicted = model.predict(naTest[:,:-1])
+    corrcoef = np.corrcoef(naTest[:,-1], predicted)[0][1]
     print corrcoef
+    sys.exit(0)
     #model = GradientBoostingRegressor(max_features=1.0, learning_rate=0.1, max_depth=5, n_estimators=300)
     model = KNeighborsRegressor(n_neighbors=10)
     model.fit(naTrainFeats, naTrainClasses)
