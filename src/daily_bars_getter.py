@@ -25,11 +25,17 @@ def get_nasdaq2000():
         ss.append(stock_name)
     return ss
 
+#def get_sp500():#{{{
+#    symbols = []
+#    for each in finsymbols.symbols.get_sp500_symbols():
+#        symbols.append(each['symbol'])
+#    return symbols  
+#}}}
 def get_sp500():#{{{
-    symbols = []
-    for each in finsymbols.symbols.get_sp500_symbols():
-        symbols.append(each['symbol'])
-    return symbols  
+    f = open(local_path + '/sp500_2015.txt')
+    lsSym = f.read().splitlines(0) + ['$SPX']
+    f.close()
+    return lsSym
 #}}}
 
 
@@ -69,7 +75,7 @@ def one_work(symbol): # {{{
 #}}}
 
 def main():
-    symbols = get_dow30()
+    symbols = get_sp500()
     #symbols.extend(get_nyse_symbols())
     #symbols.extend(get_nasdaq_symbols())
     symbols = list(set(symbols + ["SPX"]))

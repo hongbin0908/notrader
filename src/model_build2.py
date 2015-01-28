@@ -34,10 +34,20 @@ import model_featutil as mftu
 import model_common as mcomm
 
 def main(options, args):
-    fTrain = args[0]
-    sDateStart = args[1]
-    sDateEnd = args[2]
-    f = open('src/2010Dow30.txt')
+    sindex = args[0]
+    fTrain = args[1]
+    sDateStart = args[2]
+    sDateEnd = args[3]
+    if sindex == "dow":
+        f = open(local_path + '/2010Dow30.txt')
+    elif sindex == "sp500":
+        f = open(local_path + '/sp500_2015.txt')
+    elif sindex == "sp500p1":
+        f = open(local_path + '/sp500_2015_p1.txt')
+    elif sindex == "sp500p2":
+        f = open(local_path + '/sp500_2015_p2.txt')
+    elif sindex == "sp500p3":
+        f = open(local_path + '/sp500_2015_p3.txt')
     lsSym = f.read().splitlines(0) + ['$SPX']
     f.close()
 
