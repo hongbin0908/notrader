@@ -32,6 +32,14 @@ def get_sp500():#{{{
     return symbols  
 #}}}
 
+
+def get_dow30(): # {{{
+    f = open(local_path + '/2010Dow30.txt')
+    lsSym = f.read().splitlines(0) 
+    f.close()
+    return lsSym
+    # }}}
+
 def get_nyse_symbols():#{{{
     symbols = []
     for each in finsymbols.symbols.get_nyse_symbols():
@@ -61,10 +69,10 @@ def one_work(symbol): # {{{
 #}}}
 
 def main():
-    symbols = get_sp500()
+    symbols = get_dow30()
     #symbols.extend(get_nyse_symbols())
     #symbols.extend(get_nasdaq_symbols())
-    symbols = list(set(symbols) + ["SPX"])
+    symbols = list(set(symbols + ["SPX"]))
     symbols.sort()
     pool = multiprocessing.Pool(processes =10 )
     result = {}

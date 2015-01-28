@@ -65,6 +65,7 @@ def stackSymsToFile( ldfFeatures, filename, dtStart=None, dtEnd=None, lsSym=None
                         print >> fout, "," ,
             elif bShowRemoved:
                 print 'Removed', sStock, str(onelist)
+    fout.close()
 
 
   # }}} 
