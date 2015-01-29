@@ -7,7 +7,6 @@ generate the price series of stocks which base on the first day's price
 import sys,os,json
 local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
 sys.path.append(local_path + "/./")
-# parse the command paramaters
 from optparse import OptionParser
 import sys
 import time
@@ -36,8 +35,7 @@ import model_common as mcomm
 def main(options, args):
     sindex = args[0]
     fTrain = args[1]
-    sDateStart = args[2]
-    sDateEnd = args[3]
+    sDate = args[2]
     if sindex == "dow":
         f = open(local_path + '/2010Dow30.txt')
     elif sindex == "sp500":
@@ -52,8 +50,8 @@ def main(options, args):
     f.close()
 
    
-    dtStart = dt.datetime.strptime(sDateStart, '%Y-%m-%d') 
-    dtEnd = dt.datetime.strptime(sDateEnd, '%Y-%m-%d')
+    dtStart = dt.datetime.strptime(sDate, '%Y-%m-%d') 
+    dtEnd = dtStart + dt.timedelta(days=1)
 
     norObj = da.DataAccess('Yahoo')
     ldtTimestamps = du.getNYSEdays(dt.datetime.strptime("2014-01-01", '%Y-%m-%d'), dtEnd, dt.timedelta(hours = 16))
@@ -69,14 +67,16 @@ def main(options, args):
     dData = dict(zip(lsKeys, ldfData))
 
     lfcFeatures, ldFeatureArgs = mcomm.getFeats()
+    lfcFeatures = lfcFeatures[:-1]
+    ldFeatureArgs = ldFeatureArgs[:-1]
 
     ldfTrain = ftu.applyFeatures(dData, lfcFeatures, ldFeatureArgs, '$SPX')
     #print ldfTrain[0]
 
+    print "start..."
     naTrain = ftu.stackSyms(ldfTrain, dtStart, dtEnd) 
     print naTrain
     mftu.stackSymsToFile(ldfTrain, fTrain, dtStart, dtEnd, bShowRemoved=True)
-    
 def parse_options(paraser): # {{{
     """
     parser command line

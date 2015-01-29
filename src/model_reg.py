@@ -39,6 +39,8 @@ from optparse import OptionParser
 from model_base import get_date_str
 
 
+import model_featutil as mftu
+
 import QSTK.qstkfeat.featutil as ftu   
 
 def main(options, args):
@@ -48,112 +50,32 @@ def main(options, args):
     ftrainY = open(sfTrain, "r")
     ftestY = open(sfTest,"r")
     ftestP = open(sfTestPredict, "w")
-    l_X = []
 
-    for line in ftrainY:
-        tokens = line.split(",")
-        features = []
-        for i in range(len(tokens)):
-            if i < 2:
-                continue
-            else:
-                features.append(float(tokens[i]))
-        l_X.append(features)
-    X_train = np.array(l_X)
-    if int(options.short) > 0:
-        print "using short data for test purpose"
-        X_train = X_train[0:int(options.short)]
-
-    l_X = []
-    for line in ftestY:
-        tokens = line.split(",")
-        features = []
-        for i in range(len(tokens)):
-            if i < 2 :
-                continue
-            else:
-                features.append(float(tokens[i]))
-        l_X.append(features)
-    X_test = np.array(l_X)
-
-
-
-    ltWeights = ftu.normFeatures( X_train, -1.0, 1.0, False )
-    ''' Normalize query points with same weights that come from test data '''
-    ftu.normQuery( X_test[:,:-1], ltWeights )	
+    naTrain = mftu.loadFeatFromFile(sfTrain, 2)
+    naTest =  mftu.loadFeatFromFile(sfTest, 2)
+    ltWeights = ftu.normFeatures( naTrain, -1.0, 1.0, False )
+    ftu.normQuery( naTest[:,:-1], ltWeights )	
     
     print "preparing models"
     model = KNeighborsRegressor(n_neighbors=10)
-    selected = [47, 57, 38, 19, 49, 4, 18, 61, 16, 10, 20, 37, 34, 62]
-    X_train = X_train[:, selected]
-    X_test = X_test[:, selected]
-    model.fit(X_train[:,:-1], X_train[:, -1])
-    predicted = model.predict(X_test[:,:-1])
-    corrcoef = np.corrcoef(X_test[:,-1], predicted)[0][1]
+    selected = [8, 35, 41, 44, 14, 17, 1, 4, 2, 13, 19, 26, 31, 62]
+    naTrain = naTrain[:, selected]
+    naTest = naTest[:, selected]
+    model.fit(naTrain[:,:-1], naTrain[:, -1])
+    predicted = model.predict(naTest[:,:-1])
+    corrcoef = np.corrcoef(naTest[:,-1], predicted)[0][1]
+    print naTest[0:10,-1]
+    print predicted[0:10]
     print corrcoef
  #   tpred = model_predictor.predict(X_test)
  #   score = model_predictor.score(X_test, tpred)
  #   print "score=", score
-    assert(len(predicted) == X_test.shape[0])
+    assert(len(predicted) == naTest.shape[0])
     lines = open(sfTest).readlines()
 
     for i in range(len(lines)):
         print >> ftestP, "%s,%f" % (lines[i].strip(),predicted[i])
     sys.exit(0)
-    #{{{ prediction
-    print "prediction ..."
-    stock_predict_out = file(options.input + "/" + options.utildate + "/predict.csv", "w")
-    for line in file(options.input + "/" + options.utildate + "/last.csv", "r"):
-        tokens = line.split(",")
-        l_features = []
-        for i in range(len(tokens)):
-            if 0 == i:
-                print >> stock_predict_out, "%s," % tokens[i],
-            elif 1 == i:
-                print >> stock_predict_out, "%s,1," % tokens[i],
-            else:
-                l_features.append(float(tokens[i].strip()))
-        l_features2 = []
-        l_features2.append(l_features)
-        np_features = np.array(l_features2)
-        if np_features.shape[1] != X_test.shape[1] :
-            assert(false)
-        pred = model_predictor.predict_proba(np_features)
-        print >> stock_predict_out, "%f" % pred[0,1]
-    stock_predict_out.close()
-    
-    while True:
-        if not os.path.exists("../data/model_tunner.list"):
-            print ".",
-            time.sleep(1)
-            continue 
-        for dirname in open("../data/model_tunner.list","r"):
-            dirname = dirname.strip()
-            print dirname
-            if not os.path.exists(dirname):
-                print "%s not exists" % dirname
-                continue
-            stock_predict_out = file(dirname + "/predict.csv", "w")
-            for line in file(dirname + "/last.csv", "r"):
-                tokens = line.split(",")
-                l_features = []
-                for i in range(len(tokens)):
-                    if 0 == i:
-                        print >> stock_predict_out, "%s," % tokens[i],
-                    elif 1 == i:
-                        print >> stock_predict_out, "%s,1," % tokens[i],
-                    else:
-                        l_features.append(float(tokens[i].strip()))
-                l_features2 = []
-                l_features2.append(l_features)
-                np_features = np.array(l_features2)
-                pred = model_predictor.predict_proba(np_features)
-                print >> stock_predict_out, "%f" % pred[0,1]
-            stock_predict_out.close()
-        shutil.move("../data/model_tunner.list","../data/model_tunner.list.bk")
-
-        time.sleep(1)
-
     #}}}
 
 def parse_options(paraser): # {{{
