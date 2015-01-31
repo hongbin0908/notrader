@@ -58,7 +58,7 @@ def main(options, args):
     
     print "preparing models"
     model = KNeighborsRegressor(n_neighbors=10)
-    selected = [8, 35, 41, 44, 14, 17, 1, 4, 2, 13, 19, 26, 31, 62]
+    selected = [35, 41, 44, 14, 17, 1, 4, 2, 13, 19, 26, 31, 42, 16, 48, 8, 55, 21, 54, 7, 46, 5, 20, 6, 53, 51, 61, 52, 50, 43, 29, 62]
     naTrain = naTrain[:, selected]
     naTest = naTest[:, selected]
     model.fit(naTrain[:,:-1], naTrain[:, -1])

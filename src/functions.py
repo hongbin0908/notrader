@@ -109,7 +109,7 @@ def sequentialForwardSelection(naFeatTrain,naFeatTest,lFeatures,classLabelIndex)
     maxlCorrCoefIndex = lCorrCoef.index(maxlCorrCoef)
     sys.stdout.write('best feature set is ' + str(lSelectedFeatures[0:maxlCorrCoefIndex+1]+[classLabelIndex]) + '\n')
     sys.stdout.write('corr coef = ' + str(maxlCorrCoef))
-    return maxlCorrCoef
+    return maxlCorrCoef, lSelectedFeatures[0:maxlCorrCoefIndex+1] + [classLabelIndex]
 
 def sequentialBackwardSelection(naFeatTrain,naFeatTest,lFeatures,classLabelIndex):
     lSelectedFeatures = lFeatures[:]
